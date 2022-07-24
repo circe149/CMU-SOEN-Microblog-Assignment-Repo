@@ -21,10 +21,21 @@ def login():
         return redirect(url_for('main.index'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if user is None or not user.check_password(form.password.data):
-            flash(_('Invalid username or password'))
+        user = User.query.filter_by(username=form.user_email.data).first()
+        if user is None :
+            #check email
+            user = User.query.filter_by(email=form.user_email.data).first()
+            if user is None :
+                flash(_('Invalid username or email'))
+                return redirect(url_for('auth.login'))
+
+        if not user.check_password(form.password.data):
+            flash(_('Invalid password'))
             return redirect(url_for('auth.login'))
+
+        #if user is None or not user.check_password(form.password.data):
+        #    flash(_('Invalid username or password'))
+        #    return redirect(url_for('auth.login'))
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
@@ -44,13 +55,16 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
     form = RegistrationForm()
+
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data)
         if form.password.data.isalpha():
             logger.info("Password does not contain numbers")
         user.set_password(form.password.data)
+
         db.session.add(user)
         db.session.commit()
+
         flash(_('Congratulations, you are now a registered user!'))
         return redirect(url_for('auth.login'))
     return render_template('auth/register.html', title=_('Register'),
