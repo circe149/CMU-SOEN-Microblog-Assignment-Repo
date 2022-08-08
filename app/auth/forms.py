@@ -8,7 +8,7 @@ from app.models import User
 logger = logging.getLogger()
 
 class LoginForm(FlaskForm):
-    user_email = StringField(_l('Username or email address'), validators=[DataRequired()])
+    username = StringField(_l('Username or email address'), validators=[DataRequired()])
     password = PasswordField(_l('Password'), validators=[DataRequired()])
     remember_me = BooleanField(_l('Remember Me'))
     submit = SubmitField(_l('Sign In'))
