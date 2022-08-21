@@ -4,6 +4,8 @@ from hashlib import md5
 import json
 import os
 from time import time
+
+import requests
 from flask import current_app, url_for
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -125,8 +127,21 @@ class User(UserMixin, PaginatedAPIMixin, db.Model):
 
     def avatar(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
-        return 'http://localhost:5001/images/{}/size/{}'.format(digest, size)
-        # return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
+        try:
+            response = requests.get('http://localhost:5001/health-check')
+            if response.status_code == 200:
+                return 'http://localhost:5001/images/{}/size/{}'.format(digest, size)
+        except Exception as e:
+            return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
+                digest, size)
+        #print(ret)
+        #ret = 'http://localhost:5001/images/{}/size/{}'.format(digest, size)
+        #print(ret)
+        #return ret
+        #ret = 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
+        #     digest, size)
+        #print(ret)
+        #return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
         #     digest, size)
 
     def follow(self, user):
